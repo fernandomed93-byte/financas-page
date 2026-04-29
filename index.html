@@ -21,13 +21,35 @@
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             const hash = window.location.hash;
-            const code = urlParams.get('code'); // Pega o ?code=...
+            const hashParams = new URLSearchParams(window.location.hash.substring(1));
+            
+            const code = urlParams.get('code');
+            const errorCode = urlParams.get('error_code') || hashParams.get('error_code');
+            const errorDesc = urlParams.get('error_description') || hashParams.get('error_description');
+            
             const titleEl = document.getElementById('status-title');
             const messageEl = document.getElementById('status-desc');
             const btnEl = document.getElementById('fallback-btn');
+
+            // 1. CASO DE ERRO: Link expirado ou inválido
+            if (errorCode) {
+                titleEl.innerText = "❌ Link Inválido ou Expirado";
+                titleEl.style.color = "#e74c3c"; // Vermelho para erro
+                
+                if (errorCode === 'otp_expired') {
+                    messageEl.innerText = "Este link de e-mail expirou por segurança. Por favor, solicite um novo link no aplicativo.";
+                } else {
+                    messageEl.innerText = "Ocorreu um erro ao validar o link: " + (errorDesc || "Acesso negado.");
+                }
         
-            // 1. CASO: RECUPERAÇÃO DE SENHA (O que você testou agora)
-            if (code) {
+                btnEl.innerText = "Voltar para o App";
+                btnEl.href = "financas://login";
+                btnEl.style.display = 'inline-block';
+                btnEl.style.background = '#e74c3c';
+            }
+        
+            // 2. CASO DE SUCESSO: Recuperação de Senha (PKCE)
+            else if (code) {
                 titleEl.innerText = "🔑 Recuperação de Senha";
                 messageEl.innerText = "Validamos seu código. Estamos te levando de volta ao app para criar a nova senha...";
                 
@@ -35,9 +57,13 @@
                 btnEl.href = deepLink;
                 btnEl.style.display = 'inline-block';
                 
-                setTimeout(() => { window.location.href = deepLink; }, 1500);
+                setTimeout(() => {
+                    if (document.hasFocus()) { // Se o usuário ainda estiver na aba
+                        btnEl.innerText = "Clique aqui para abrir o App";
+                    }
+                }, 3000);
             }
-            // 2. CASO: CONFIRMAÇÃO DE E-MAIL (O que você perguntou)
+            // 3. CASO DE SUCESSO: Cadastro (Hash #)
             else if (hash && hash.includes("type=signup")) {
                 titleEl.innerText = "✅ E-mail Confirmado!";
                 messageEl.innerText = "Obrigado por validar seu acesso. Você já pode utilizar todas as funções do app.";
