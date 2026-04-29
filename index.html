@@ -19,4 +19,16 @@
         <p>Agora você já pode voltar para o aplicativo.</p>
     </div>
 </body>
+    
+<script>
+  // Verifica se a URL contém o hash de confirmação do Supabase
+  window.onload = function() {
+    const hash = window.location.hash;
+    if (hash && hash.includes("type=recovery")) {
+      // Redireciona para o seu app usando Deep Link
+      // O Flutter vai receber o hash e o Supabase SDK vai processar a sessão
+      window.location.href = "financas://reset-password/" + hash;
+    }
+  };
+</script>
 </html>
