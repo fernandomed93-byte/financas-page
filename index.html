@@ -50,30 +50,17 @@
         
             // 2. CASO DE SUCESSO: Recuperação de Senha (PKCE)
             else if (code) {
-                titleEl.innerText = "🔑 Recuperação de Senha";
-                messageEl.innerText = "Validamos seu código. Estamos te levando de volta ao app para criar a nova senha...";
+                titleEl.innerText = "🚀 Quase lá!";
+                messageEl.innerText = "Estamos validando seu acesso e te levando de volta para o app...";
                 
-                const deepLink = "financas://reset-password/?code=" + code;
+                // Enviamos para uma rota única de captura no Flutter
+                const deepLink = "financas://auth-callback/?code=" + code;
+                
                 btnEl.href = deepLink;
-                btnEl.style.display = 'inline-block';
-                
-                setTimeout(() => {
-                    if (document.hasFocus()) { // Se o usuário ainda estiver na aba
-                        btnEl.innerText = "Clique aqui para abrir o App";
-                    }
-                }, 3000);
-            }
-            // 3. CASO DE SUCESSO: Cadastro (Hash #)
-            else if (hash && hash.includes("type=signup")) {
-                titleEl.innerText = "✅ E-mail Confirmado!";
-                messageEl.innerText = "Obrigado por validar seu acesso. Você já pode utilizar todas as funções do app.";
-                
-                const deepLink = "financas://login"; // Aqui ele só volta para o login
-                btnEl.href = deepLink;
-                btnEl.style.display = 'inline-block';
-                btnEl.innerText = "Voltar para o App";
+                btnEl.style.display = "inline-block";
+                btnEl.innerText = "Abrir Aplicativo";
         
-                setTimeout(() => { window.location.href = deepLink; }, 1500);
+                window.location.href = deepLink;
             }
         };
     </script>
