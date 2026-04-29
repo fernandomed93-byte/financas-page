@@ -3,32 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-mail Confirmado!</title>
+    <title>Sucesso!</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 50px; background: #f4f7f6; }
-        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: inline-block; }
-        h1 { color: #2ecc71; }
-        p { color: #666; }
-        .btn { display: inline-block; margin-top: 20px; padding: 12px 24px; background: #2ecc71; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; text-align: center; padding: 50px; background: #f4f7f6; color: #333; }
+        .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); display: inline-block; max-width: 400px; }
+        h1 { color: #2ecc71; margin-bottom: 10px; }
+        p { color: #666; line-height: 1.6; }
+        .btn { display: inline-block; margin-top: 25px; padding: 15px 30px; background: #2ecc71; color: white; text-decoration: none; border-radius: 10px; font-weight: bold; transition: background 0.3s; }
+        .btn:hover { background: #27ae60; }
     </style>
 </head>
 <body>
     <div class="card">
-        <h1>✅ E-mail Confirmado!</h1>
-        <p>Obrigado por validar seu e-mail.</p>
-        <p>Agora você já pode voltar para o aplicativo.</p>
+        <h1 id="title">✅ Sucesso!</h1>
+        <p id="message">Sua solicitação foi processada. Agora você já pode voltar para o aplicativo de Finanças.</p>
+        
+        <a href="financas://login" id="action-btn" class="btn">Abrir Aplicativo</a>
     </div>
+
+    <script>
+        window.onload = function() {
+            const hash = window.location.hash;
+            const titleEl = document.getElementById('title');
+            const messageEl = document.getElementById('message');
+            const btnEl = document.getElementById('action-btn');
+
+            if (hash) {
+                // Cenário 1: Recuperação de Senha
+                if (hash.includes("type=recovery")) {
+                    titleEl.innerText = "🔑 Recuperação de Senha";
+                    messageEl.innerText = "Estamos te levando de volta ao app para criar sua nova senha...";
+                    btnEl.href = "financas://reset-password/" + hash;
+                    
+                    // Redireciona automaticamente após 1.5 segundos
+                    setTimeout(() => { window.location.href = btnEl.href; }, 1500);
+                } 
+                
+                // Cenário 2: Confirmação de Cadastro (Signup)
+                else if (hash.includes("type=signup")) {
+                    titleEl.innerText = "✅ E-mail Confirmado!";
+                    messageEl.innerText = "Seu e-mail foi validado com sucesso. Volte ao app para começar.";
+                    btnEl.href = "financas://login";
+                    
+                    setTimeout(() => { window.location.href = btnEl.href; }, 1500);
+                }
+            }
+        };
+    </script>
 </body>
-    
-<script>
-  // Verifica se a URL contém o hash de confirmação do Supabase
-  window.onload = function() {
-    const hash = window.location.hash;
-    if (hash && hash.includes("type=recovery")) {
-      // Redireciona para o seu app usando Deep Link
-      // O Flutter vai receber o hash e o Supabase SDK vai processar a sessão
-      window.location.href = "financas://reset-password/" + hash;
-    }
-  };
-</script>
 </html>
