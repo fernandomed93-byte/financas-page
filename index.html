@@ -11,58 +11,67 @@
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1 id="status-title">Processando solicitação...</h1>
-        <p id="status-desc">Aguarde um momento enquanto te levamos de volta ao app.</p>
-        <a href="financas://login" id="fallback-btn" style="display:none; margin-top:20px; padding:10px 20px; background:#2ecc71; color:white; text-decoration:none; border-radius:8px;">Abrir App Manualmente</a>
-    </div>
+<div class="card">
+    <h1 id="status-title">Processando solicitação...</h1>
+    <p id="status-desc">Aguarde um momento enquanto te levamos de volta ao app.</p>
+    <a href="financas://login" id="fallback-btn" style="display:none; margin-top:20px; padding:10px 20px; background:#2ecc71; color:white; text-decoration:none; border-radius:8px;">Abrir App Manualmente</a>
+</div>
 
-    <script>
-        window.onload = function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const hash = window.location.hash;
-            const hashParams = new URLSearchParams(window.location.hash.substring(1));
-            
-            const code = urlParams.get('code');
-            const errorCode = urlParams.get('error_code') || hashParams.get('error_code');
-            const errorDesc = urlParams.get('error_description') || hashParams.get('error_description');
-            
-            const titleEl = document.getElementById('status-title');
-            const messageEl = document.getElementById('status-desc');
-            const btnEl = document.getElementById('fallback-btn');
+<script>
+    window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const hash = window.location.hash;
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
 
-            // 1. CASO DE ERRO: Link expirado ou inválido
-            if (errorCode) {
-                titleEl.innerText = "❌ Link Inválido ou Expirado";
-                titleEl.style.color = "#e74c3c"; // Vermelho para erro
-                
-                if (errorCode === 'otp_expired') {
-                    messageEl.innerText = "Este link de e-mail expirou por segurança. Por favor, solicite um novo link no aplicativo.";
-                } else {
-                    messageEl.innerText = "Ocorreu um erro ao validar o link: " + (errorDesc || "Acesso negado.");
-                }
-        
-                btnEl.innerText = "Voltar para o App";
-                btnEl.href = "financas://login";
-                btnEl.style.display = 'inline-block';
-                btnEl.style.background = '#e74c3c';
+        const code = urlParams.get('code');
+        const type = urlParams.get('type') || 'signup'; // signup ou recovery
+        const errorCode = urlParams.get('error_code') || hashParams.get('error_code');
+        const errorDesc = urlParams.get('error_description') || hashParams.get('error_description');
+
+        const titleEl = document.getElementById('status-title');
+        const messageEl = document.getElementById('status-desc');
+        const btnEl = document.getElementById('fallback-btn');
+
+        // 1. CASO DE ERRO: Link expirado ou inválido
+        if (errorCode) {
+            titleEl.innerText = "❌ Link Inválido ou Expirado";
+            titleEl.style.color = "#e74c3c"; // Vermelho para erro
+
+            if (errorCode === 'otp_expired') {
+                messageEl.innerText = "Este link de e-mail expirou por segurança. Por favor, solicite um novo link no aplicativo.";
+            } else {
+                messageEl.innerText = "Ocorreu um erro ao validar o link: " + (errorDesc || "Acesso negado.");
             }
-        
-            // 2. CASO DE SUCESSO: Recuperação de Senha (PKCE)
-            else if (code) {
-                titleEl.innerText = "🚀 Quase lá!";
-                messageEl.innerText = "Estamos validando seu acesso e te levando de volta para o app...";
-                
-                // Enviamos para uma rota única de captura no Flutter
-                const deepLink = "financas://auth-callback/?code=" + code;
-                
-                btnEl.href = deepLink;
-                btnEl.style.display = "inline-block";
-                btnEl.innerText = "Abrir Aplicativo";
-        
+
+            btnEl.innerText = "Voltar para o App";
+            btnEl.href = "financas://login";
+            btnEl.style.display = 'inline-block';
+            btnEl.style.background = '#e74c3c';
+        }
+
+        // 2. CASO DE SUCESSO: Recuperação de Senha (PKCE) ou Cadastro
+        else if (code) {
+            if (type === 'recovery') {
+                titleEl.innerText = "🔑 Redefinição de Senha!";
+                messageEl.innerText = "Validamos seu pedido. Você será levado ao app para definir sua nova senha.";
+            } else {
+                titleEl.innerText = "🚀 E-mail Confirmado!";
+                messageEl.innerText = "Seu cadastro foi validado. Estamos te levando de volta para o app...";
+            }
+
+            // Enviamos para uma rota única de captura no Flutter com o type
+            const deepLink = "financas://auth-callback/?code=" + code + "&type=" + type;
+
+            btnEl.href = deepLink;
+            btnEl.style.display = "inline-block";
+            btnEl.innerText = "Abrir Aplicativo";
+
+            // Tenta abrir automaticamente após um breve delay para o usuário ler a mensagem
+            setTimeout(() => {
                 window.location.href = deepLink;
-            }
-        };
-    </script>
+            }, 1500);
+        }
+    };
+</script>
 </body>
 </html>
